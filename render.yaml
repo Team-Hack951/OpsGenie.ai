@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: promptops-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: ./start.sh
+    envVars:
+      - key: SLACK_SIGNING_SECRET
+        value: __REPLACE_WITH_SLACK_SIGNING_SECRET__
+      - key: SLACK_BOT_TOKEN
+        value: __REPLACE_WITH_SLACK_BOT_TOKEN__
