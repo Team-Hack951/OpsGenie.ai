@@ -1,5 +1,6 @@
 import httpx
 import os
+import re
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 
@@ -17,3 +18,7 @@ async def send_slack_message(channel: str, text: str):
         response = await client.post("https://slack.com/api/chat.postMessage", json=payload, headers=headers)
         if not response.json().get("ok"):
             print("Slack API error:", response.json())
+
+def extract_branch(text:str):
+    match = re.search(r"branch (\w+)",text)
+    return match.group(1) if match else None
