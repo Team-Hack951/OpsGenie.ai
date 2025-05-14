@@ -5,7 +5,7 @@ import logging
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from app.config import SLACK_SIGNING_SECRET
-from app.slack_utils import send_slack_msg
+from app.slack_utils import send_slack_message
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +57,6 @@ def verify_slack_request(headers, body):
 
 async def route_command(text:str, channel:str, user:str):
     if "deploy" in text:
-        send_slack_msg(channel, f"<@{user}> Triggering deployment.....")
+        send_slack_message(channel, f"<@{user}> Triggering deployment.....")
     elif "hello" in text:
-        send_slack_msg(channel, f"Hello <@{user}>!")
+        send_slack_message(channel, f"Hello <@{user}>!")
