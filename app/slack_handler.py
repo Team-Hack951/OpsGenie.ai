@@ -57,6 +57,6 @@ def verify_slack_request(headers, body):
 
 async def route_command(text:str, channel:str, user:str):
     if "deploy" in text:
-        send_slack_message(channel, f"<@{user}> Triggering deployment.....")
+        await send_slack_message(channel, f"<@{user}> Triggering deployment.....")
     elif "hello" in text:
-        send_slack_message(channel, f"Hello <@{user}>!")
+        await send_slack_message(channel, f"Hello <@{user}>!")
