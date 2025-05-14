@@ -5,7 +5,7 @@ import logging
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from app.config import SLACK_SIGNING_SECRET
-from slack_utils import send_slack_msg
+from app.slack_utils import send_slack_msg
 
 logger = logging.getLogger(__name__)
 
