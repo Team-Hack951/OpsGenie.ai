@@ -5,6 +5,7 @@ import logging
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from app.config import SLACK_SIGNING_SECRET
+from slack_utils import send_slack_msg
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ async def handle_slack_event(request: Request):
         channel = event.get("channel")
         logger.info(f"Received {event_type} from {user} in {channel}: {text}")
 
-        # You will add response logic or intent handling here later
+        await route_command(text,channel,user)
     
     return {"status": "ok"}
 
@@ -52,3 +53,10 @@ def verify_slack_request(headers, body):
 
     slack_signature = headers.get("x-slack-signature")
     return hmac.compare_digest(my_signature, slack_signature)
+
+
+async def route_command(text:str, channel:str, user:str):
+    if "deploy" in text:
+        send_slack_msg(channel, f"<@{user}> Triggering deployment.....")
+    elif "hello" in text:
+        send_slack_msg(channel, f"Hello <@{user}>!")
