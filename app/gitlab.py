@@ -12,8 +12,8 @@ HEADERS = {
     "PRIVATE-TOKEN": GITLAB_TOKEN
 }
 
-def trigger_pipeline(branch:str="main", variables: dict=None):
-    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/trigger/pipeline"
+def trigger_pipeline(ref:str="main", variables: dict=None):
+    url = f"https://gitlab.instance/api/v4/projects/{GITLAB_PROJECT_ID}/trigger/pipeline"
     trigger_token = GITLAB_TRIGGER_TOKEN
 
     if not trigger_token:
@@ -22,15 +22,15 @@ def trigger_pipeline(branch:str="main", variables: dict=None):
     
     payload = {
         "token": trigger_token,
-        "ref": branch
+        "ref": ref
     }
 
-    if variables:
+    if variables and len(variables)>0:
         for key, value in variables.items():
             payload[f"variables[{key}]"] = value
 
     try:
-        response = requests.post(url, data=payload)
+        response = requests.post(url, json=payload)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:

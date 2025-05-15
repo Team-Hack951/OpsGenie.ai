@@ -19,6 +19,7 @@ async def send_slack_message(channel: str, text: str):
         if not response.json().get("ok"):
             print("Slack API error:", response.json())
 
-def extract_branch(text:str):
-    match = re.search(r"branch (\w+)",text)
+
+def extract_branch(text: str):
+    match = re.search(r"(?:branch|on)\s+([\w\-_/]+)", text)
     return match.group(1) if match else None
