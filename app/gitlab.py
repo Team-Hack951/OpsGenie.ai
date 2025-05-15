@@ -13,7 +13,7 @@ HEADERS = {
 }
 
 def trigger_pipeline(ref:str="main", variables: dict=None):
-    url = f"https://gitlab.instance/api/v4/projects/{GITLAB_PROJECT_ID}/trigger/pipeline"
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/trigger/pipeline"
     trigger_token = GITLAB_TRIGGER_TOKEN
 
     if not trigger_token:
