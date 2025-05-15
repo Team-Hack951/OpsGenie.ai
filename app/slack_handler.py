@@ -63,7 +63,7 @@ async def route_command(text:str, channel:str, user:str):
     if "trigger pipeline" in text:
         branch = extract_branch(text) or "main"
         # variables = extract_variables(text)
-        result = trigger_pipeline(branch=branch)
+        result = trigger_pipeline(ref=branch)
 
         if result:
             message  = f"Pipeline triggered on branch '{branch}'.\n {result.get('web_url')}"
