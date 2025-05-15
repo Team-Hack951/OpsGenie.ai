@@ -30,11 +30,35 @@ def trigger_pipeline(branch:str="main", variables: dict=None):
             payload[f"variables[{key}]"] = value
 
     try:
-        response = requests.post(url, data=payload, headers=HEADERS)
+        response = requests.post(url, data=payload)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
         logger.error(f"Error triggering pipeline: {e}")
+        if e.response is not None:
+            logger.error(f"GitLab response: {e.response.text}")
         return None
     
+
+def get_pipeline_status(branch: str="main"):
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines?ref={branch}"
+
+    try:
+        response = requests.get(url,headers=HEADERS)
+        response.raise_for_status()
+        pipelines = response.json()
+        if not pipelines:
+            return None
+        
+        latest_pipeline = pipelines[0]
+        pipeline_id = latest_pipeline["id"]
+
+        pipeline_url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines/{pipeline_id}"
+        details_response = requests.get(pipeline_url, headers=HEADERS)
+        details_response.raise_for_status()
+
+        return details_response.json()
+    except requests.RequestException as e:
+        logger.error(f"Error getting pipeline status: {e}")
+        return None
 

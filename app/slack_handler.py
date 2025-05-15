@@ -6,7 +6,7 @@ from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from app.config import SLACK_SIGNING_SECRET
 from app.slack_utils import send_slack_message, extract_branch
-from app.gitlab import trigger_pipeline
+from app.gitlab import trigger_pipeline, get_pipeline_status
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +69,19 @@ async def route_command(text:str, channel:str, user:str):
             message  = f"Pipeline triggered on branch '{branch}'.\n {result.get('web_url')}"
         else:
             message = f"Failed to trigger the pipeline."
+
+        await send_slack_message(channel, f"<@{user}> {message}")
+
+    elif "pipeline status" in text:
+        branch = extract_branch(text) or "main"
+        status = get_pipeline_status(branch=branch)
+
+        if status:
+            state = status.get("status", "unknown")
+            url = status.get("web_url", "")
+            message = f"Latest pipeline on `{branch}`: `{state}`\n {url}"
+        else:
+            message = "Could not fetch pipeline status."
 
         await send_slack_message(channel, f"<@{user}> {message}")
         
