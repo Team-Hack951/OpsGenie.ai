@@ -40,9 +40,9 @@ def trigger_pipeline(ref:str="main", variables: dict=None):
         return None
 
 
-def get_pipeline_status(project_id, branch_name, private_token):
+def get_pipeline_status(branch_name):
 
-    url = f"https://gitlab.com/api/v4/projects/{project_id}/pipelines"
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines"
     params = {"ref": branch_name, "per_page": 1}
 
     try:

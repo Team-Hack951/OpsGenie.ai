@@ -74,7 +74,7 @@ async def route_command(text:str, channel:str, user:str):
 
     elif "pipeline status" in text:
         branch = extract_branch(text) or "main"
-        status = get_pipeline_status(branch=branch)
+        status = get_pipeline_status(branch)
 
         if status:
             state = status.get("status", "unknown")
