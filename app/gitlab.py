@@ -38,27 +38,45 @@ def trigger_pipeline(ref:str="main", variables: dict=None):
         if e.response is not None:
             logger.error(f"GitLab response: {e.response.text}")
         return None
-    
 
-def get_pipeline_status(branch: str="main"):
-    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines?ref={branch}"
+
+def get_pipeline_status(project_id, branch_name, private_token):
+
+    url = f"https://gitlab.com/api/v4/projects/{project_id}/pipelines"
+    params = {"ref": branch_name, "per_page": 1}
 
     try:
-        response = requests.get(url,headers=HEADERS)
-        response.raise_for_status()
+        response = requests.get(url, headers=HEADERS, params=params)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         pipelines = response.json()
-        if not pipelines:
-            return None
-        
-        latest_pipeline = pipelines[0]
-        pipeline_id = latest_pipeline["id"]
 
-        pipeline_url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines/{pipeline_id}"
-        details_response = requests.get(pipeline_url, headers=HEADERS)
-        details_response.raise_for_status()
-
-        return details_response.json()
-    except requests.RequestException as e:
-        logger.error(f"Error getting pipeline status: {e}")
+        if pipelines:
+            return pipelines[0]["status"]
+        else:
+            return "No pipelines found for this branch."
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
         return None
+
+# def get_pipeline_status(branch: str="main"):
+#     url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines?ref={branch}"
+
+#     try:
+#         response = requests.get(url,headers=HEADERS)
+#         response.raise_for_status()
+#         pipelines = response.json()
+#         if not pipelines:
+#             return None
+        
+#         latest_pipeline = pipelines[0]
+#         pipeline_id = latest_pipeline["id"]
+
+#         pipeline_url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines/{pipeline_id}"
+#         details_response = requests.get(pipeline_url, headers=HEADERS)
+#         details_response.raise_for_status()
+
+#         return details_response.json()
+#     except requests.RequestException as e:
+#         logger.error(f"Error getting pipeline status: {e}")
+#         return None
 
