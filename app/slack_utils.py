@@ -23,3 +23,22 @@ async def send_slack_message(channel: str, text: str):
 def extract_branch(text: str):
     match = re.search(r"(?:branch|on)\s+([\w\-_/]+)", text)
     return match.group(1) if match else None
+
+def extract_variables(text:str):
+    variables = {}
+    # Extract environment
+    env_match = re.search(r"(?:to|environment)\s+(staging|production|dev|test)", text)
+    if env_match:
+        variables["DEPLOY_ENV"] = env_match.group(1)
+
+    # Extract service/component
+    comp_match = re.search(r"(?:for|deploy|update|restart)\s+([\w\-]+)", text)
+    if comp_match:
+        variables["SERVICE"] = comp_match.group(1)
+
+    # Extract version
+    ver_match = re.search(r"(?:version|tag)\s+([\w\.\-]+)", text)
+    if ver_match:
+        variables["VERSION"] = ver_match.group(1)
+
+    return variables

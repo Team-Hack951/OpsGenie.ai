@@ -69,6 +69,41 @@ def get_pipeline_status(branch_name):
         logger.error(f"Error getting pipeline status: {e}")
         return None
 
+
+def get_open_merge_requests(state='opened', scope='all'):
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/merge_requests"
+    params = {'state':state,'scope':scope}
+    try:
+        response = requests.get(url,headers=HEADERS,params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Failed to fetch MRs: {e}")
+        return None
+
+def cancel_running_pipeline(branch_name):
+    url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines"
+    params = {"ref": branch_name, "per_page": 1}
+    try:
+        response = requests.get(url, headers=HEADERS, params=params)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        pipelines = response.json()
+        if not pipelines:
+            return None
+        
+        latest_pipeline = pipelines[0]
+        pipeline_id = latest_pipeline["id"]
+
+        cancel_url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines/{pipeline_id}/cancel"
+        details_response = requests.post(cancel_url, headers=HEADERS)
+        details_response.raise_for_status()
+
+        return details_response.json()
+    except Exception as e:
+        logger.erro(f"Failed to cancel pipeline: {e}")
+        return None
+    
+    
 # def get_pipeline_status(branch: str="main"):
 #     url = f"https://gitlab.com/api/v4/projects/{GITLAB_PROJECT_ID}/pipelines?ref={branch}"
 
