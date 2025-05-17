@@ -1,5 +1,7 @@
 import hmac
 import hashlib
+import os
+import httpx
 import time
 import logging
 from fastapi import Request, Response
@@ -9,6 +11,9 @@ from app.slack_utils import send_slack_message, extract_branch, extract_variable
 from app.gitlab import trigger_pipeline, get_pipeline_status, get_open_merge_requests, cancel_running_pipeline
 
 logger = logging.getLogger(__name__)
+
+DIALOGFLOW_PROJECT_ID = os.getenv("DIALOGFLOW_PROJECT_ID") # Set in Render later
+DIALOGFLOW_ENDPOINT = f"https://dialogflow.cloud.google.com/v1/integrations/messaging/"
 
 async def handle_slack_event(request: Request):
     body = await request.body()
@@ -114,3 +119,28 @@ async def route_command(text:str, channel:str, user:str):
         "• `hello` - say hi\n"
     )
         await send_slack_message(channel, f"<@{user}> {msg}")
+
+    else:
+        await query_dialogflow(text,user_id=user,channel_id=channel)
+
+
+async def query_dialogflow(text: str, user_id: str, channel_id: str):
+    url = f"https://dialogflow.googleapis.com/v2/projects/{DIALOGFLOW_PROJECT_ID}/agent/sessions/{user_id}:detectIntent"
+    headers = {
+    "Authorization": f"Bearer {os.getenv('DIALOGFLOW_ACCESS_TOKEN')}",
+    "Content-Type": "application/json"
+    }
+    payload = {
+    "queryInput": {
+    "text": {
+    "text": text,
+    "languageCode": "en"
+            }
+        }
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, headers=headers)
+        result = response.json()
+        fulfillment = result.get("queryResult", {}).get("fulfillmentText", "Sorry, I didn’t understand that.")
+        await send_slack_message(channel_id, fulfillment)
