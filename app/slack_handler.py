@@ -113,4 +113,4 @@ async def route_command(text:str, channel:str, user:str):
         "• `cancel pipeline on <branch>` - stop the latest pipeline\n"
         "• `hello` - say hi\n"
     )
-    await send_slack_message(channel, f"<@{user}> {msg}")
+        await send_slack_message(channel, f"<@{user}> {msg}")
