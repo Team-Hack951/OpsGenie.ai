@@ -4,7 +4,11 @@ import requests
 BACKEND_URL = st.secrets["BACKEND_URL"]
 
 st.set_page_config(page_title="OpsGenie.ai UI", layout ="centered")
-st.title("OpsGenie.ai - GitLab CI/CD Control Panel")
+st.markdown("""
+<h1 style='text-align: center; color: #fc6d26;'>🤖 OpsGenie.ai</h1>
+<h4 style='text-align: center; color: #431600;'>Your AI-powered DevOps Copilot for GitLab CI/CD</h4>
+""", unsafe_allow_html=True)
+
 
 st.sidebar.header("Quick Actions")
 
@@ -18,11 +22,13 @@ option = st.sidebar.selectbox(
         "Show Help"
     ]
 )
+st.markdown("---")
 
-branch = st.text_input("Enter Branch Name", value="main")
+col1, col2 = st.columns(2)
+branch = col1.text_input("Branch", value="main")
+env = col2.text_input("Environment (optional)")
 
 if option == "Trigger Pipeline":
-    env = st.text_input("Environment (optional)")
     service = st.text_input("Service/Component (optional)")
     version = st.text_input("Version/Tag (optional)")
 
@@ -106,3 +112,7 @@ elif option == "Show Help":
             "• `cancel pipeline on <branch>` - Stop the latest pipeline\n"
         )
         st.markdown(help_text)
+
+
+st.markdown("---")
+st.markdown("<small style='color: gray;'>Built with ❤️ by Team Hack951 - Powered by Streamlit, GitLab & GCP</small>", unsafe_allow_html=True)
