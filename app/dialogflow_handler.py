@@ -6,13 +6,17 @@ cancel_running_pipeline,
 get_pipeline_status,
 get_open_merge_requests
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def handle_dialogflow_webhook(request: Request):
     payload= await request.json()
     intent = payload["queryResult"]["intent"]["displayName"]
     parameters = payload["queryResult"]["parameters"]
-    user = payload.get("originalDetectIntentRequest" ,{}).get("payload",{}).get("data",{}).get("user",{})
+    #user = payload.get("originalDetectIntentRequest" ,{}).get("payload",{}).get("data",{}).get("user",{})
 
+    logger.info(f"[Dialogflow] Received intent: {intent}")
     if intent == "TriggerPipelineIntent":
         branch = parameters.get("branch", "main")
         trigger_pipeline(branch)
