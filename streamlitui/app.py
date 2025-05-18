@@ -1,8 +1,7 @@
 import streamlit as st
 import requests
-import os
 
-BACKEND_URL = os.getenv("BACKEND_URL")
+BACKEND_URL = st.secrets["BACKEND_URL"]
 
 st.set_page_config(page_title="OpsGenie.ai UI", layout ="centered")
 st.title("OpsGenie.ai - GitLab CI/CD Control Panel")
