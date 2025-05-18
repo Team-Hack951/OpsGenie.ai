@@ -16,7 +16,9 @@ async def handle_dialogflow_webhook(request: Request):
     parameters = payload["queryResult"]["parameters"]
     #user = payload.get("originalDetectIntentRequest" ,{}).get("payload",{}).get("data",{}).get("user",{})
 
-    logger.info(f"[Dialogflow] Received intent: {intent}")
+    logger.info(f"Received intent: {intent}")
+    logger.info(f"Parameters: {parameters}")
+
     if intent == "TriggerPipelineIntent":
         branch = parameters.get("branch", "main")
         trigger_pipeline(branch)
@@ -47,5 +49,8 @@ async def handle_dialogflow_webhook(request: Request):
         else:
             msg = "📋 Open MRs:\n" + "\n".join([f"- {mr['title']} ({mr['web_url']})" for mr in mrs])
         return JSONResponse(content={"fulfillmentText": msg})
+    
+    elif intent == "FallbackIntent":
+        return JSONResponse(content={"fulfillmentText": "🤖 I’m still learning. Try: 'deploy to staging' or 'check pipeline status'."})
 
     return JSONResponse(content={"fulfillmentText": "🤖 Sorry, I didn’t understand that."})

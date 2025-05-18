@@ -140,6 +140,9 @@ async def query_dialogflow(text: str, user_id: str, channel_id: str):
         }
     }
 
+    logger.info(f"[Proxy] Detected intent: {detect_intent_from_text(text)}")
+    logger.info(f"[Proxy] Branch extracted: {extract_branch(text) or 'main'}")
+    
     url = "https://opsgenie-ai.onrender.com/dialogflow/events"
     try:
         async with httpx.AsyncClient(timeout=15) as client:

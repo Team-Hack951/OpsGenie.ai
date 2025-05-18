@@ -1,6 +1,7 @@
 import httpx
 import os
 import re
+from typing import Optional
 
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 
@@ -45,13 +46,16 @@ def extract_variables(text:str):
 
 def detect_intent_from_text(text: str) -> str:
     text = text.lower()
-    if "trigger" in text or "deploy" in text:
+    if "trigger" in text or "deploy" in text or "start" in text or "launch" in text or "kick off" in text:
         return "TriggerPipelineIntent"
-    elif "cancel" in text:
+
+    elif "cancel" in text or "stop" in text or "terminate" in text or "abort" in text:
         return "CancelPipelineIntent"
-    elif "status" in text:
+
+    elif "status" in text or "check" in text or "pipeline running" in text or "what's running" in text:
         return "PipelineStatusIntent"
-    elif "merge request" in text or "pull request" in text or "mr" in text:
+
+    elif "merge request" in text or "pull request" in text or "mr" in text or "pr" in text:
         return "ListMRIntent"
-    else:
-        return "FallbackIntent"
+
+    return "FallbackIntent"
