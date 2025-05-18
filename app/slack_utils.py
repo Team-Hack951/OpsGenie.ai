@@ -42,3 +42,16 @@ def extract_variables(text:str):
         variables["VERSION"] = ver_match.group(1)
 
     return variables
+
+def detect_intent_from_text(text: str) -> str:
+    text = text.lower()
+    if "trigger" in text or "deploy" in text:
+        return "TriggerPipelineIntent"
+    elif "cancel" in text:
+        return "CancelPipelineIntent"
+    elif "status" in text:
+        return "PipelineStatusIntent"
+    elif "merge request" in text or "pull request" in text or "mr" in text:
+        return "ListMRIntent"
+    else:
+        return "FallbackIntent"

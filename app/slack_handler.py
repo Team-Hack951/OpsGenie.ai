@@ -1,19 +1,15 @@
 import hmac
 import hashlib
-import os
 import httpx
 import time
 import logging
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from app.config import SLACK_SIGNING_SECRET
-from app.slack_utils import send_slack_message, extract_branch, extract_variables
+from app.slack_utils import send_slack_message, extract_branch, extract_variables, detect_intent_from_text
 from app.gitlab import trigger_pipeline, get_pipeline_status, get_open_merge_requests, cancel_running_pipeline
 
 logger = logging.getLogger(__name__)
-
-DIALOGFLOW_PROJECT_ID = os.getenv("DIALOGFLOW_PROJECT_ID") # Set in Render later
-DIALOGFLOW_ENDPOINT = f"https://dialogflow.cloud.google.com/v1/integrations/messaging/"
 
 async def handle_slack_event(request: Request):
     body = await request.body()
@@ -125,22 +121,32 @@ async def route_command(text:str, channel:str, user:str):
 
 
 async def query_dialogflow(text: str, user_id: str, channel_id: str):
-    url = f"https://dialogflow.googleapis.com/v2/projects/{DIALOGFLOW_PROJECT_ID}/agent/sessions/{user_id}:detectIntent"
-    headers = {
-    "Authorization": f"Bearer {os.getenv('DIALOGFLOW_ACCESS_TOKEN')}",
-    "Content-Type": "application/json"
-    }
-    payload = {
-    "queryInput": {
-    "text": {
-    "text": text,
-    "languageCode": "en"
+    simulated_payload = {
+        "queryResult": {
+            "queryText": text,
+            "parameters": {
+                "branch": extract_branch(text) or "main"
+            },
+            "intent": {
+                "displayName": detect_intent_from_text(text)
+            }
+        },
+        "originalDetectIntentRequest": {
+            "payload": {
+                "data": {
+                    "user": user_id
+                }
             }
         }
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
-        result = response.json()
-        fulfillment = result.get("queryResult", {}).get("fulfillmentText", "Sorry, I didn’t understand that.")
-        await send_slack_message(channel_id, fulfillment)
+    url = "https://opsgenie-ai.onrender.com/dialogflow/events"
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            response = await client.post(url, json=simulated_payload)
+            fulfillment = response.json().get("fulfillmentText", "I didn’t understand that.")
+    except Exception as e:
+        fulfillment = "Sorry, I couldn't connect to the AI system."
+        logger.error(f"Dialogflow proxy error: {e}")
+    
+    await send_slack_message(channel_id, fulfillment)

@@ -1,5 +1,2 @@
 /.env
-/deploy.sh
-/entrypoint.py
-/slack_app
 /venv

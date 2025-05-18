@@ -27,7 +27,14 @@ async def handle_dialogflow_webhook(request: Request):
     elif intent == "PipelineStatusIntent":
         branch = parameters.get("branch", "main")
         status = get_pipeline_status(branch)
-        return JSONResponse(content={"fulfillmentText": f"📊 Pipeline status for '{branch}': {status}"})
+        if status:
+            state = status.get("status", "unknown")
+            url = status.get("web_url", "")
+            msg = f"Pipeline on '{branch}': {state}\n{url}"
+        else:
+            msg = f"Could not fetch pipeline status for {branch}."
+        return JSONResponse(content={"fulfillmentText": msg})
+        #return JSONResponse(content={"fulfillmentText": f"Pipeline status for '{branch}': {status}"})
 
     elif intent == "ListMRIntent":
         mrs = get_open_merge_requests()
