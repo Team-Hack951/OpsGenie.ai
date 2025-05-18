@@ -6,3 +6,4 @@ functions-framework
 slack_sdk
 httpx
 gunicorn
+streamlit
